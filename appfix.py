@@ -58,7 +58,14 @@ class Fixer:
         return False
 
     def fix(self):
+        already_processed = set()
         for file in self.list:
+
+            if file in already_processed:
+                if self.verbose:
+                    print("W {} already processed, skipping.".format(file))
+                continue
+
             if self.verbose:
                 print(". Processing file: {}".format(file.name))
 
@@ -73,7 +80,7 @@ class Fixer:
             if self.verbose:
                 print(". Dependencies for {}:\n\t{}".format(file.name, "\n\t".join(dependencies)))
 
-            filtered_dependencies = [x for x in dependencies if not self._checkIfFiltered(x)]
+            filtered_dependencies = [x for x in dependencies if not self._checkIfFiltered(x) and not x == fullfilepath]
 
             if self.verbose:
                 print(". Filtered Dependencies for {}:\n\t{}".format(file.name, "\n\t".join(filtered_dependencies)))
@@ -81,7 +88,7 @@ class Fixer:
             newfiles = [File(x,x) for x in filtered_dependencies]
             self.list.extend(newfiles)
 
-
+            already_processed.add(fullfilepath)
 
 
 if __name__ == "__main__":
