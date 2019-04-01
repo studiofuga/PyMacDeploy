@@ -28,10 +28,13 @@ class Fixer:
     def __init__(self, app):
         self.bundle = app
         self.list = list()
-        self.verbose = True
+        self.verbose = False
         if not os.path.exists(app):
             raise RuntimeError("File {} not found.".format(app))
         self.pathfilter = ["/usr/lib/", "/System/"]
+
+    def setVerbose(self, verbose=True):
+        self.verbose = verbose
 
     def addFile(self, file):
         self.list.append(file)
@@ -94,7 +97,16 @@ class Fixer:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("appbundle", help="The path of the Application Bundle (.app)")
+    parser.add_argument("-v", "--verbose", help="Turn verbosity on", action="store_true")
+    parser.add_argument("-q", "--quiet", help="Turn verbosity off", action="store_true")
     args = parser.parse_args()
 
     fixer = Fixer(args.appbundle)
+
+    if args.verbose:
+        fixer.setVerbose(True)
+
+    if args.quiet:
+        fixer.setVerbose(False)
+
     fixer.fix()
