@@ -36,9 +36,6 @@ class Fixer:
     def setVerbose(self, verbose=True):
         self.verbose = verbose
 
-    def addFile(self, file):
-        self.list.append(file)
-
     def _getDependencies_impl(self, path):
         o = subprocess.Popen(['/usr/bin/otool', '-L', path], stdout=subprocess.PIPE)
 
@@ -59,6 +56,14 @@ class Fixer:
             if i in path:
                 return True
         return False
+
+    def addAllFilesInBundle(self):
+        macospath = os.path.join(self.bundle, "Contents", "MacOS");
+        files = [File(f,os.path.join("MacOS", f)) for f in os.listdir(macospath) if os.path.isfile(os.path.join(macospath, f))]
+        self.list.extend(files)
+        frameworkspath = os.path.join(self.bundle, "Contents", "Frameworks")
+        files = [File(f,os.path.join("Frameworks",f)) for f in os.listdir(frameworkspath) if os.path.isfile(os.path.join(macospath, f))]
+        self.list.extend(files)
 
     def fix(self):
         already_processed = set()
@@ -97,11 +102,15 @@ class Fixer:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("appbundle", help="The path of the Application Bundle (.app)")
+    parser.add_argument("-s", "--scan", help="Scan current bundle for Executable and Frameworks (under MacOS and Frameworks paths)", action="store_true")
     parser.add_argument("-v", "--verbose", help="Turn verbosity on", action="store_true")
     parser.add_argument("-q", "--quiet", help="Turn verbosity off", action="store_true")
     args = parser.parse_args()
 
     fixer = Fixer(args.appbundle)
+
+    if args.scan:
+        fixer.addAllFilesInBundle()
 
     if args.verbose:
         fixer.setVerbose(True)
