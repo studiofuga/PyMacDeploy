@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-
+import argparse
 import os
 import subprocess
 import sys
@@ -92,7 +92,9 @@ class Fixer:
 
 
 if __name__ == "__main__":
-    executable = sys.argv[1]
+    parser = argparse.ArgumentParser()
+    parser.add_argument("appbundle", help="The path of the Application Bundle (.app)")
+    args = parser.parse_args()
 
-    fixer = Fixer(executable)
+    fixer = Fixer(args.appbundle)
     fixer.fix()
